@@ -1,6 +1,6 @@
 function exec_global(symbol, extras)
     result = {}
-    global_cmd = string.format('global --result="grep" %s %s', extras, symbol)
+    global_cmd = string.format('global --result="grep" %s "%s" 2>&1', extras, symbol)
     local f = io.popen(global_cmd)
 
     repeat
@@ -75,8 +75,17 @@ local gtags_picker = function(opts)
     }):find()
 end
 
-function gtags_curword_definition()
+
+local M = {}
+
+function M.showDefinition()
     local current_word = vim.call('expand', '<cword>')
     gtags_picker({symbol = current_word, isref = false})
 end
 
+function M.showReference()
+    local current_word = vim.call('expand', '<cword>')
+    gtags_picker({symbol = current_word, isref = true})
+end
+
+return M
