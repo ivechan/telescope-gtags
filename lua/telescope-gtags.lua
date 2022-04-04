@@ -53,6 +53,11 @@ local gtags_picker = function(opts)
 		return
 	end
 
+	if gtags_result.count == 1 then
+		vim.api.nvim_command(string.format(':edit +%d %s', gtags_result[1].line_nr, gtags_result[1].path))
+		return
+	end
+
 	-- print(to_string(gtags_result))
 	pickers.new(opts, {
 		prompt_title = "GNU Gtags",
