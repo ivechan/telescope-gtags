@@ -3,12 +3,14 @@ function exec_global(symbol, extras)
 	global_cmd = string.format('global --result="grep" %s "%s" 2>&1', extras, symbol)
 	local f = io.popen(global_cmd)
 
+	result.count = 0
 	repeat
 		local line = f:read("*l")
 		if line then
 			path, line_nr, text = string.match(line, "(.*):(%d+):(.*)")
 			if path and line_nr then
 				table.insert(result, { path = path, line_nr = tonumber(line_nr), text = text, raw = line })
+				result.count = result.count + 1
 			end
 		end
 	until line == nil
@@ -46,7 +48,7 @@ local gtags_picker = function(opts)
 	end
 
 	-- return if there is no result
-	if next(gtags_result) == nil then
+	if gtags_result.count == 0 then
 		print(string.format("E9999: Error gtags there is no symbol for %s", symbol))
 		return
 	end
