@@ -33,6 +33,8 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local make_entry = require("telescope.make_entry")
+local loop = vim.loop
+local api = vim.api
 
 -- our picker function: gtags_picker
 local gtags_picker = function(opts)
@@ -54,7 +56,7 @@ local gtags_picker = function(opts)
 	end
 
 	if gtags_result.count == 1 then
-		vim.api.nvim_command(string.format(':edit +%d %s', gtags_result[1].line_nr, gtags_result[1].path))
+		vim.api.nvim_command(string.format(":edit +%d %s", gtags_result[1].line_nr, gtags_result[1].path))
 		return
 	end
 
@@ -81,7 +83,7 @@ local gtags_picker = function(opts)
 	}):find()
 end
 
-local M = {}
+local M = { job_running = false }
 
 function M.showDefinition()
 	local current_word = vim.call("expand", "<cword>")
@@ -92,5 +94,41 @@ function M.showReference()
 	local current_word = vim.call("expand", "<cword>")
 	gtags_picker({ symbol = current_word, isref = true })
 end
+
+local function global_update()
+	job_handle, pid = loop.spawn("global", {
+		args = { "-u" },
+	}, function(code, signal)
+		if not code == 0 then
+			print("ERROR: global -u return errors")
+		end
+
+		M.job_running = false
+		job_handle:close()
+	end)
+end
+
+function M.updateGtags()
+	handle = loop.spawn("global", {
+		args = { "--print", "dbpath" },
+	}, function(code, signal)
+		if code == 0 and M.job_running == false then
+			M.job_running = true
+			global_update()
+		end
+		handle:close()
+	end)
+end
+
+function M.setAutoIncUpdate(enable)
+	local async = require("plenary.async")
+	if enable then
+		vim.api.nvim_command("augroup AutoUpdateGtags")
+		vim.api.nvim_command('autocmd BufWritePost * lua require("telescope-gtags").updateGtags()')
+		vim.api.nvim_command("augroup END")
+	end
+end
+
+local async = require("plenary.async")
 
 return M
