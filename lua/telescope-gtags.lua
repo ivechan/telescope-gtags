@@ -83,6 +83,7 @@ local gtags_picker = function(opts)
 	}):find()
 end
 
+-- It's ok to update job_running without a lock
 local M = { job_running = false }
 
 function M.showDefinition()
