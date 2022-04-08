@@ -1,6 +1,10 @@
-function exec_global(symbol, extras)
-	result = {}
+function exec_global_symbol(symbol, extras)
 	global_cmd = string.format('global --result="grep" %s "%s" 2>&1', extras, symbol)
+	return exec_global(global_cmd)
+end
+
+function exec_global(global_cmd)
+	result = {}
 	local f = io.popen(global_cmd)
 
 	result.count = 0
@@ -20,11 +24,11 @@ function exec_global(symbol, extras)
 end
 
 function global_definition(symbol)
-	return exec_global(symbol, "-d")
+	return exec_global_symbol(symbol, "-d")
 end
 
 function global_reference(symbol)
-	return exec_global(symbol, "-r")
+	return exec_global_symbol(symbol, "-r")
 end
 
 local pickers = require("telescope.pickers")
