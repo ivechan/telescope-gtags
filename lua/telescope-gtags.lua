@@ -3,6 +3,12 @@ function exec_global_symbol(symbol, extras)
 	return exec_global(global_cmd)
 end
 
+function exec_global_current_file()
+	local file = vim.call("expand", '%')
+	global_cmd = string.format('global -f "%s" 2>&1', file)
+	return exec_global(global_cmd)
+end
+
 function exec_global(global_cmd)
 	result = {}
 	local f = io.popen(global_cmd)
