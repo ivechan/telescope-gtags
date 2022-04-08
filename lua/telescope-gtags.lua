@@ -5,7 +5,7 @@ end
 
 function exec_global_current_file()
 	local file = vim.call("expand", '%')
-	global_cmd = string.format('global -f "%s" 2>&1', file)
+	local global_cmd = string.format('global --result="grep" -f "%s" 2>&1', file)
 	return exec_global(global_cmd)
 end
 
@@ -102,6 +102,10 @@ function M.showReference()
 	end
 	gtags_result = global_reference(current_word)
 	gtags_picker(gtags_result)
+end
+
+function M.showCurrentFileTags()
+	gtags_picker(exec_global_current_file())
 end
 
 local function global_update()
