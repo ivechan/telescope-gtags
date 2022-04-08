@@ -47,18 +47,7 @@ local loop = vim.loop
 local api = vim.api
 
 -- our picker function: gtags_picker
-local gtags_picker = function(opts)
-	opts = opts or {}
-	if opts.symbol == nil then
-		return
-	end
-
-	if opts.isref then
-		gtags_result = global_reference(opts.symbol)
-	else
-		gtags_result = global_definition(opts.symbol)
-	end
-
+local gtags_picker = function(gtags_result)
 	-- return if there is no result
 	if gtags_result.count == 0 then
 		print(string.format("E9999: Error gtags there is no symbol for %s", symbol))
@@ -70,6 +59,7 @@ local gtags_picker = function(opts)
 		return
 	end
 
+	opts = {}
 	-- print(to_string(gtags_result))
 	pickers.new(opts, {
 		prompt_title = "GNU Gtags",
@@ -98,12 +88,20 @@ local M = { job_running = false }
 
 function M.showDefinition()
 	local current_word = vim.call("expand", "<cword>")
-	gtags_picker({ symbol = current_word, isref = false })
+	if current_word == nil then
+		return
+	end
+	local gtags_result = global_definition(current_word)
+	gtags_picker(gtags_result)
 end
 
 function M.showReference()
 	local current_word = vim.call("expand", "<cword>")
-	gtags_picker({ symbol = current_word, isref = true })
+	if current_word == nil then
+		return
+	end
+	gtags_result = global_reference(current_word)
+	gtags_picker(gtags_result)
 end
 
 local function global_update()
